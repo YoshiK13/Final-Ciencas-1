@@ -1,0 +1,26 @@
+{
+    "total_estudiantes": 3,
+    "estudiantes": [
+        {
+            "id_estudiante": 1001,
+            "nombre": "Pedro Ramírez",
+            "edad": 21,
+            "carrera": "Ingeniería de Software",
+            "semestre": 4
+        },
+        {
+            "id_estudiante": 1002,
+            "nombre": "Sofia Torres",
+            "edad": 22,
+            "carrera": "Ciencias de la Computación",
+            "semestre": 5
+        },
+        {
+            "id_estudiante": 1003,
+            "nombre": "Diego Hernández",
+            "edad": 20,
+            "carrera": "Matemáticas",
+            "semestre": 3
+        }
+    ]
+}
