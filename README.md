@@ -20,7 +20,8 @@ Sistema de gestión de base de datos no relacional que permite almacenar, consul
 ```
 Final-Ciencas-1/
 ├── Archivos/
-│   └── estudiantes_ejemplo.json  # Archivo de ejemplo
+│   ├── estudiantes_ejemplo.json  # Archivo de ejemplo
+|   └── estudiantes.json          # Archivo de persistencia
 ├── Logica/
 │   ├── __init__.py               # Inicializador del paquete
 │   ├── Arboles.py                # Implementación de nodos y Árboles AVL
@@ -28,6 +29,7 @@ Final-Ciencas-1/
 │   └── Gestor.py                 # Gestor principal del sistema
 ├── Visual/
     └── App.py                    # Interfaz de consola
+├── Main.py                       # Inicializar y ejecutar el programa
 ```
 
 ---
@@ -132,7 +134,6 @@ Elimina un estudiante del sistema con confirmación de seguridad.
 2. Muestra los datos del estudiante
 3. Solicita confirmación (s/n)
 4. Elimina del árbol AVL manteniendo el balance
-5. Guarda automáticamente en JSON
 
 **Seguridad**: Requiere confirmación explícita antes de eliminar.
 
@@ -214,29 +215,29 @@ Genera un reporte estadístico del sistema.
 
 ```json
 {
-    "total_estudiantes": 3,
+    "total_estudiantes": 12,
     "estudiantes": [
         {
-            "id_estudiante": 1001,
-            "nombre": "Pedro Ramírez",
-            "edad": 21,
-            "carrera": "Ingeniería de Software",
-            "semestre": 4
+            "id_estudiante": 5,
+            "nombre": "Carlos",
+            "edad": 17,
+            "carrera": "Administracion",
+            "semestre": 1
         },
         {
-            "id_estudiante": 1002,
-            "nombre": "Sofia Torres",
-            "edad": 22,
-            "carrera": "Ciencias de la Computación",
-            "semestre": 5
-        },
-        {
-            "id_estudiante": 1003,
-            "nombre": "Diego Hernández",
-            "edad": 20,
-            "carrera": "Matemáticas",
+            "id_estudiante": 10,
+            "nombre": "Luis",
+            "edad": 18,
+            "carrera": "Ingenieria en Sistemas",
             "semestre": 3
-        }
+        },
+        {
+            "id_estudiante": 15,
+            "nombre": "Sofia",
+            "edad": 18,
+            "carrera": "Diseño Grafico",
+            "semestre": 2
+        }, ........
     ]
 }
 ```
@@ -309,7 +310,7 @@ Controlador principal del sistema.
 Interfaz de usuario de consola.
 
 **Características**:
-- Menú interactivo con 10 opciones
+- Menú interactivo con 12 opciones
 - Validaciones de entrada
 - Mensajes de error descriptivos
 - Confirmaciones de seguridad
