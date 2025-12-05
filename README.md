@@ -28,8 +28,8 @@ Final-Ciencas-1/
 │   ├── Estudiante.py             # Clase Estudiante
 │   └── Gestor.py                 # Gestor principal del sistema
 ├── Visual/
-    └── App.py                    # Interfaz de consola
-├── Main.py                       # Inicializar y ejecutar el programa
+|   └── App.py                    # Interfaz de consola
+└── Main.py                       # Inicializar y ejecutar el programa
 ```
 
 ---
