@@ -169,7 +169,7 @@ class NodoAVL(NodoBinario):
         altura_izquierda = self.hijos[0].altura if self.hijos[0] is not None else 0
         altura_derecha = self.hijos[1].altura if self.hijos[1] is not None else 0
         self.altura = 1 + max(altura_izquierda, altura_derecha)
-        self.factor_balance = altura_izquierda - altura_derecha
+        self.factor_balance = altura_derecha - altura_izquierda
     
     # Rotaciones para balancear el arbol:
     # Rotacion derecha
