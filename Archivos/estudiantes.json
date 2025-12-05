@@ -1,0 +1,26 @@
+{
+    "total_estudiantes": 3,
+    "estudiantes": [
+        {
+            "id_estudiante": 20,
+            "nombre": "Alejandro",
+            "edad": 15,
+            "carrera": "Abogado",
+            "semestre": 2
+        },
+        {
+            "id_estudiante": 32,
+            "nombre": "Karla",
+            "edad": 20,
+            "carrera": "Contaduria",
+            "semestre": 7
+        },
+        {
+            "id_estudiante": 78,
+            "nombre": "Mikey",
+            "edad": 32,
+            "carrera": "Gastronomia",
+            "semestre": 12
+        }
+    ]
+}

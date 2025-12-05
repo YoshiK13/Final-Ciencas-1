@@ -10,7 +10,7 @@ from Logica.Estudiante import Estudiante
 class GestorEstudiantes:
     def __init__(self, archivo_json="Archivos/estudiantes.json"):
         """
-        Inicializa el gestor de estudiantes con un árbol AVL
+        Inicializa el gestor de estudiantes con un arbol AVL
         y configura el archivo JSON para persistencia.
         """
         self.raiz = None
@@ -29,8 +29,12 @@ class GestorEstudiantes:
         """
         Agrega un estudiante al árbol AVL.
         """
+        # No permitir IDs duplicados
+        if self.buscar_estudiante(estudiante.id_estudiante) is not None:
+            return False
+
         nuevo_nodo = NodoAVL(estudiante)
-        
+
         if self.raiz is None:
             self.raiz = nuevo_nodo
         else:
@@ -38,41 +42,55 @@ class GestorEstudiantes:
             # Actualizar la raíz después del balanceo
             while self.raiz.padre is not None:
                 self.raiz = self.raiz.padre
-        
+
         self.total_estudiantes += 1
         return True
 
-    def buscar_estudiante(self, id_estudiante):
+    def buscar_estudiante(self, id_estudiante, contar_pasos=False):
         """
         Busca un estudiante por su ID en el árbol AVL.
-        Retorna el estudiante si lo encuentra, None en caso contrario.
+        
+        Args:
+            id_estudiante: ID del estudiante a buscar
+            contar_pasos: Si es True, retorna (estudiante, pasos), sino solo estudiante
+            
+        Returns:
+            Si contar_pasos=False: estudiante o None
+            Si contar_pasos=True: tupla (estudiante, pasos)
         """
         if self.raiz is None:
-            return None
+            return (None, 0) if contar_pasos else None
         
-        return self._buscar_recursivo(self.raiz, id_estudiante)
+        resultado, pasos = self._buscar_recursivo(self.raiz, id_estudiante)
+        
+        if contar_pasos:
+            return resultado, pasos
+        return resultado
     
-    def _buscar_recursivo(self, nodo, id_estudiante):
+    def _buscar_recursivo(self, nodo, id_estudiante, pasos=0):
         """
         Búsqueda recursiva en el árbol AVL por ID de estudiante.
+        Retorna una tupla (estudiante, pasos) donde pasos es el número de nodos visitados.
         """
         if nodo is None:
-            return None
+            return None, pasos
+        
+        pasos += 1
         
         if nodo.valor.id_estudiante == id_estudiante:
-            return nodo.valor
+            return nodo.valor, pasos
         
         # Buscar en el subárbol izquierdo
         if id_estudiante < nodo.valor.id_estudiante:
-            return self._buscar_recursivo(nodo.hijos[0], id_estudiante)
+            return self._buscar_recursivo(nodo.hijos[0], id_estudiante, pasos)
         
         # Buscar en el subárbol derecho
-        return self._buscar_recursivo(nodo.hijos[1], id_estudiante)
+        return self._buscar_recursivo(nodo.hijos[1], id_estudiante, pasos)
 
     def eliminar_estudiante(self, id_estudiante):
         """
-        Elimina un estudiante del árbol AVL por su ID.
-        Retorna True si se eliminó exitosamente, False si no se encontró.
+        Elimina un estudiante del arbol AVL por su ID.
+        Retorna True si se elimino exitosamente, False si no se encontro.
         """
         if self.raiz is None:
             return False
@@ -101,7 +119,7 @@ class GestorEstudiantes:
     
     def _inorden_recursivo(self, nodo, lista):
         """
-        Recorrido in-order del árbol AVL para obtener estudiantes ordenados por ID.
+        Recorrido in-order del arbol AVL para obtener estudiantes ordenados por ID.
         """
         if nodo is None:
             return
@@ -152,7 +170,7 @@ class GestorEstudiantes:
 
     def cargar_desde_json(self):
         """
-        Carga los estudiantes desde un archivo JSON al árbol AVL.
+        Carga los estudiantes desde un archivo JSON al arbol AVL.
         """
         if not os.path.exists(self.archivo_json):
             return False
@@ -162,7 +180,10 @@ class GestorEstudiantes:
                 datos = json.load(archivo)
             
             estudiantes_data = datos.get("estudiantes", [])
-            
+            # Reiniciar árbol y contador: el archivo JSON es la fuente de la carga
+            self.raiz = None
+            self.total_estudiantes = 0
+
             for est_data in estudiantes_data:
                 estudiante = Estudiante(
                     nombre=est_data["nombre"],
@@ -171,32 +192,71 @@ class GestorEstudiantes:
                     semestre=est_data["semestre"],
                     id_estudiante=est_data["id_estudiante"]
                 )
-                self.agregar_estudiante(estudiante)
-            
+                inserted = self.agregar_estudiante(estudiante)
+                if not inserted:
+                    # Omitir duplicados encontrados en el JSON
+                    print(f"Omitido registro duplicado con id {estudiante.id_estudiante} al cargar JSON")
+
             return True
         except Exception as e:
             print(f"Error al cargar desde JSON: {e}")
             return False
 
-    def buscar_por_nombre(self, nombre):
+    def buscar_por_nombre(self, nombre, contar_pasos=False):
         """
         Busca estudiantes por nombre (búsqueda parcial).
-        Retorna una lista de estudiantes que coinciden.
+        Utiliza búsqueda lineal O(n) sobre la lista ordenada.
+        
+        Args:
+            nombre: Nombre o parte del nombre a buscar
+            contar_pasos: Si es True, retorna (lista_estudiantes, pasos)
+            
+        Returns:
+            Si contar_pasos=False: lista de estudiantes que coinciden
+            Si contar_pasos=True: tupla (lista_estudiantes, pasos)
         """
         estudiantes = self.listar_estudiantes()
-        return [est for est in estudiantes if nombre.lower() in est.nombre.lower()]
+        coincidencias = []
+        pasos = 0
+        
+        for est in estudiantes:
+            pasos += 1
+            if nombre.lower() in est.nombre.lower():
+                coincidencias.append(est)
+        
+        if contar_pasos:
+            return coincidencias, pasos
+        return coincidencias
 
-    def buscar_por_carrera(self, carrera):
+    def buscar_por_carrera(self, carrera, contar_pasos=False):
         """
         Busca estudiantes por carrera.
-        Retorna una lista de estudiantes de la carrera especificada.
+        Utiliza búsqueda lineal O(n) sobre la lista ordenada.
+        
+        Args:
+            carrera: Carrera o parte de la carrera a buscar
+            contar_pasos: Si es True, retorna (lista_estudiantes, pasos)
+            
+        Returns:
+            Si contar_pasos=False: lista de estudiantes de la carrera
+            Si contar_pasos=True: tupla (lista_estudiantes, pasos)
         """
         estudiantes = self.listar_estudiantes()
-        return [est for est in estudiantes if carrera.lower() in est.carrera.lower()]
+        coincidencias = []
+        pasos = 0
+        
+        for est in estudiantes:
+            pasos += 1
+            if carrera.lower() in est.carrera.lower():
+                coincidencias.append(est)
+        
+        if contar_pasos:
+            return coincidencias, pasos
+        return coincidencias
 
     def obtener_estadisticas(self):
         """
-        Retorna estadísticas básicas del sistema.
+        Retorna estadisticas basicas del sistema.
         """
         estudiantes = self.listar_estudiantes()
         
