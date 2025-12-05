@@ -1,6 +1,27 @@
 {
-    "total_estudiantes": 3,
+    "total_estudiantes": 12,
     "estudiantes": [
+        {
+            "id_estudiante": 5,
+            "nombre": "Carlos",
+            "edad": 17,
+            "carrera": "Administracion",
+            "semestre": 1
+        },
+        {
+            "id_estudiante": 10,
+            "nombre": "Luis",
+            "edad": 18,
+            "carrera": "Ingenieria en Sistemas",
+            "semestre": 3
+        },
+        {
+            "id_estudiante": 15,
+            "nombre": "Sofia",
+            "edad": 18,
+            "carrera": "Diseño Grafico",
+            "semestre": 2
+        },
         {
             "id_estudiante": 20,
             "nombre": "Alejandro",
@@ -9,11 +30,53 @@
             "semestre": 2
         },
         {
+            "id_estudiante": 25,
+            "nombre": "Diego",
+            "edad": 19,
+            "carrera": "Ingenieria Industrial",
+            "semestre": 4
+        },
+        {
             "id_estudiante": 32,
             "nombre": "Karla",
             "edad": 20,
             "carrera": "Contaduria",
             "semestre": 7
+        },
+        {
+            "id_estudiante": 40,
+            "nombre": "Valentina Rodriguez",
+            "edad": 20,
+            "carrera": "Biologia",
+            "semestre": 8
+        },
+        {
+            "id_estudiante": 45,
+            "nombre": "Mariana",
+            "edad": 21,
+            "carrera": "Arquitectura",
+            "semestre": 5
+        },
+        {
+            "id_estudiante": 55,
+            "nombre": "Andres",
+            "edad": 24,
+            "carrera": "Derecho",
+            "semestre": 10
+        },
+        {
+            "id_estudiante": 60,
+            "nombre": "Fernanda",
+            "edad": 23,
+            "carrera": "Psicologia",
+            "semestre": 8
+        },
+        {
+            "id_estudiante": 70,
+            "nombre": "Valeria",
+            "edad": 26,
+            "carrera": "Comunicacion",
+            "semestre": 11
         },
         {
             "id_estudiante": 78,
