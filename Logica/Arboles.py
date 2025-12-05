@@ -208,17 +208,21 @@ class NodoAVL(NodoBinario):
     def balancear(self):
         self.actualizar_altura_balanceo()
 
-        # Rotacion derecha
-        if self.factor_balance > 1:
-            if self.hijos[0] is not None and self.hijos[0].factor_balance < 0:
+        # Rotación derecha (subárbol izquierdo más pesado, factor_balance < -1)
+        if self.factor_balance < -1:
+            # Rotación izquierda-derecha (hijo izquierdo tiene subárbol derecho más pesado)
+            if self.hijos[0] is not None and self.hijos[0].factor_balance > 0:
                 self.hijos[0] = self.hijos[0].rotar_izquierda()
+                self.hijos[0].padre = self
 
             return self.rotar_derecha()
         
-        # Rotacion izquierda
-        if self.factor_balance < -1:
-            if self.hijos[1] is not None and self.hijos[1].factor_balance > 0:
+        # Rotación izquierda (subárbol derecho más pesado, factor_balance > 1)
+        if self.factor_balance > 1:
+            # Rotación derecha-izquierda (hijo derecho tiene subárbol izquierdo más pesado)
+            if self.hijos[1] is not None and self.hijos[1].factor_balance < 0:
                 self.hijos[1] = self.hijos[1].rotar_derecha()
+                self.hijos[1].padre = self
 
             return self.rotar_izquierda()
         
@@ -226,7 +230,9 @@ class NodoAVL(NodoBinario):
 
     # Agregar un hijo y balancear el árbol
     def agregar_hijo(self, hijo):
-        super().agregar_hijo(hijo)
+        # Llamar al método padre para hacer la inserción
+        resultado = super().agregar_hijo(hijo)
+        # Balancear este nodo después de la inserción
         return self.balancear()
     
     def eliminar_nodo(self, valor):

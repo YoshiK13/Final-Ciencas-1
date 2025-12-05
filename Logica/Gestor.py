@@ -8,10 +8,14 @@ from Logica.Estudiante import Estudiante
 
 
 class GestorEstudiantes:
-    def __init__(self, archivo_json="Archivos/estudiantes.json"):
+    def __init__(self, archivo_json="Archivos/estudiantes.json", cargar_automatico=True):
         """
         Inicializa el gestor de estudiantes con un arbol AVL
         y configura el archivo JSON para persistencia.
+        
+        Args:
+            archivo_json: Ruta del archivo JSON para persistencia
+            cargar_automatico: Si es True, carga automáticamente los datos del JSON
         """
         self.raiz = None
         self.archivo_json = archivo_json
@@ -22,15 +26,17 @@ class GestorEstudiantes:
         if directorio and not os.path.exists(directorio):
             os.makedirs(directorio)
         
-        # Cargar datos existentes del archivo JSON
-        self.cargar_desde_json()
+        # Cargar datos existentes del archivo JSON si se solicita
+        if cargar_automatico:
+            self.cargar_desde_json()
 
     def agregar_estudiante(self, estudiante):
         """
         Agrega un estudiante al árbol AVL.
         """
         # No permitir IDs duplicados
-        if self.buscar_estudiante(estudiante.id_estudiante) is not None:
+        estudiante_existente = self.buscar_estudiante(estudiante.id_estudiante)
+        if estudiante_existente is not None:
             return False
 
         nuevo_nodo = NodoAVL(estudiante)
@@ -38,10 +44,8 @@ class GestorEstudiantes:
         if self.raiz is None:
             self.raiz = nuevo_nodo
         else:
+            # agregar_hijo ya devuelve la nueva raíz correcta después del balanceo
             self.raiz = self.raiz.agregar_hijo(nuevo_nodo)
-            # Actualizar la raíz después del balanceo
-            while self.raiz.padre is not None:
-                self.raiz = self.raiz.padre
 
         self.total_estudiantes += 1
         return True
@@ -77,15 +81,23 @@ class GestorEstudiantes:
         
         pasos += 1
         
+        # Verificar que el nodo tenga un valor válido
+        if nodo.valor is None or not hasattr(nodo.valor, 'id_estudiante'):
+            return None, pasos
+        
         if nodo.valor.id_estudiante == id_estudiante:
             return nodo.valor, pasos
         
         # Buscar en el subárbol izquierdo
         if id_estudiante < nodo.valor.id_estudiante:
-            return self._buscar_recursivo(nodo.hijos[0], id_estudiante, pasos)
+            if nodo.hijos and len(nodo.hijos) > 0:
+                return self._buscar_recursivo(nodo.hijos[0], id_estudiante, pasos)
+            return None, pasos
         
         # Buscar en el subárbol derecho
-        return self._buscar_recursivo(nodo.hijos[1], id_estudiante, pasos)
+        if nodo.hijos and len(nodo.hijos) > 1:
+            return self._buscar_recursivo(nodo.hijos[1], id_estudiante, pasos)
+        return None, pasos
 
     def eliminar_estudiante(self, id_estudiante):
         """
@@ -153,10 +165,21 @@ class GestorEstudiantes:
     def guardar_en_json(self):
         """
         Guarda todos los estudiantes en un archivo JSON.
+        Solo guarda los datos de los estudiantes, no la estructura del árbol.
+        El árbol AVL se reconstruirá automáticamente al cargar.
         """
         estudiantes = self.listar_estudiantes()
+        
+        # Usar el total de estudiantes listados para asegurar consistencia
+        total_real = len(estudiantes)
+        
+        # Sincronizar el contador si hay discrepancia
+        if self.total_estudiantes != total_real:
+            print(f"[ADVERTENCIA] Sincronizando contador: {self.total_estudiantes} -> {total_real}")
+            self.total_estudiantes = total_real
+        
         datos = {
-            "total_estudiantes": self.total_estudiantes,
+            "total_estudiantes": total_real,
             "estudiantes": [est.to_dict() for est in estudiantes]
         }
         
@@ -168,11 +191,21 @@ class GestorEstudiantes:
             print(f"Error al guardar en JSON: {e}")
             return False
 
-    def cargar_desde_json(self):
+    def cargar_desde_json(self, mostrar_progreso=False):
         """
         Carga los estudiantes desde un archivo JSON al arbol AVL.
+        Reconstruye el árbol AVL insertando cada estudiante individualmente.
+        El árbol se auto-balancea durante la inserción.
+        
+        Args:
+            mostrar_progreso: Si es True, muestra información detallada de la carga
+            
+        Returns:
+            True si la carga fue exitosa, False en caso contrario
         """
         if not os.path.exists(self.archivo_json):
+            if mostrar_progreso:
+                print(f"Archivo {self.archivo_json} no existe")
             return False
         
         try:
@@ -180,26 +213,55 @@ class GestorEstudiantes:
                 datos = json.load(archivo)
             
             estudiantes_data = datos.get("estudiantes", [])
+            total_en_json = datos.get("total_estudiantes", len(estudiantes_data))
+            
+            if mostrar_progreso:
+                print(f"Cargando {len(estudiantes_data)} estudiantes desde JSON...")
+            
             # Reiniciar árbol y contador: el archivo JSON es la fuente de la carga
             self.raiz = None
             self.total_estudiantes = 0
+            insertados = 0
+            omitidos = 0
 
-            for est_data in estudiantes_data:
-                estudiante = Estudiante(
-                    nombre=est_data["nombre"],
-                    edad=est_data["edad"],
-                    carrera=est_data["carrera"],
-                    semestre=est_data["semestre"],
-                    id_estudiante=est_data["id_estudiante"]
-                )
-                inserted = self.agregar_estudiante(estudiante)
-                if not inserted:
-                    # Omitir duplicados encontrados en el JSON
-                    print(f"Omitido registro duplicado con id {estudiante.id_estudiante} al cargar JSON")
+            for i, est_data in enumerate(estudiantes_data):
+                try:
+                    estudiante = Estudiante(
+                        nombre=est_data["nombre"],
+                        edad=est_data["edad"],
+                        carrera=est_data["carrera"],
+                        semestre=est_data["semestre"],
+                        id_estudiante=est_data["id_estudiante"]
+                    )
+                    inserted = self.agregar_estudiante(estudiante)
+                    if inserted:
+                        insertados += 1
+                        if mostrar_progreso and (i + 1) % 10 == 0:
+                            print(f"  Cargados {insertados}/{len(estudiantes_data)}...")
+                    else:
+                        omitidos += 1
+                        print(f"[ADVERTENCIA] Duplicado omitido: ID {estudiante.id_estudiante}")
+                except Exception as e:
+                    omitidos += 1
+                    print(f"[ERROR] No se pudo cargar estudiante {i+1}: {e}")
+                    continue
+
+            if mostrar_progreso:
+                print(f"\nCarga completada:")
+                print(f"  - Insertados: {insertados}")
+                print(f"  - Omitidos: {omitidos}")
+                print(f"  - Total en árbol: {self.total_estudiantes}")
+            
+            # Verificar consistencia
+            if self.total_estudiantes != insertados:
+                print(f"[ERROR] Inconsistencia: contador={self.total_estudiantes}, insertados={insertados}")
+                self.total_estudiantes = insertados
 
             return True
         except Exception as e:
             print(f"Error al cargar desde JSON: {e}")
+            import traceback
+            traceback.print_exc()
             return False
 
     def buscar_por_nombre(self, nombre, contar_pasos=False):

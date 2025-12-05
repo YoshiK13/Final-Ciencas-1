@@ -432,12 +432,14 @@ class AplicacionGestorEstudiantes:
         
         print(f"\nArchivo: {self.gestor.archivo_json}")
         print("\n[ADVERTENCIA] Esto reemplazará todos los datos actuales")
+        print("[INFO] El árbol AVL se reconstruirá automáticamente desde los datos")
         confirmacion = input("\n¿Desea continuar? (s/n): ").strip().lower()
         
         if confirmacion == 's':
-            if self.gestor.cargar_desde_json():
+            print("\nCargando datos...")
+            if self.gestor.cargar_desde_json(mostrar_progreso=True):
                 print("\n[OK] Datos cargados exitosamente")
-                print(f"Total de estudiantes cargados: {self.gestor.total_estudiantes}")
+                print(f"Total de estudiantes en el árbol: {self.gestor.total_estudiantes}")
             else:
                 print("\n[ERROR] Error al cargar los datos o el archivo no existe")
         else:
